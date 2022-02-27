@@ -7,8 +7,8 @@ var path = require('path');
 //var binary = require('binary');
 var bodyParser = require('body-parser');
 
-const SerialPort = require('serialport');
-const ByteLength = require('@serialport/parser-byte-length');
+const { SerialPort } = require('serialport');
+const { ByteLengthParser } = require('@serialport/parser-byte-length');
 var port;
 var parser;
 
@@ -46,7 +46,7 @@ wait_new_port = function(port_name_list, name_part)
 				console.log(ports[p]);
 				cur_port_path = ports[p].path;
 				port = new SerialPort(cur_port_path, { baudRate: 921600 });
-				parser = port.pipe(new ByteLength({length: 16}));
+				parser = port.pipe(new ByteLengthParser({length: 16}));
 				prepare_parser();
 				completed = 1;
 			}
@@ -81,8 +81,8 @@ wait_for_port = function(name_part)
 		else
 		{
 			console.log('device found: ' + cur_port_path);
-			port = new SerialPort(cur_port_path, { baudRate: 921600 });
-			parser = port.pipe(new ByteLength({length: 16}));
+			port = new SerialPort({path: cur_port_path, baudRate: 921600 });
+			parser = port.pipe(new ByteLengthParser({length: 16}));
 			prepare_parser();
 		}
 	},
@@ -1196,7 +1196,7 @@ start_rf_upload = function()
 {
 	port.unpipe(parser);
 
-	parser = port.pipe(new ByteLength({length: 16}));
+	parser = port.pipe(new ByteLengthParser({length: 16}));
 
 	parser.on('data', function(data) {
 		fw_upload_process(data);
@@ -1253,7 +1253,7 @@ wait_fw_upload_port = function(port_name_list, name_part)
 				fw_port_name = ports[p].path;
 				setTimeout(function() {
 					port = new SerialPort(fw_port_name, { baudRate: 921600 });
-					parser = port.pipe(new ByteLength({length: 1}));
+					parser = port.pipe(new ByteLengthParser({length: 1}));
 					prepare_fw_mode_parser();
 				}, 200);
 				completed = 1;
